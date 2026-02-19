@@ -1,0 +1,1 @@
+Order = Struct.new(:customer, :amount, :currency)
