@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="LiveCodingSolutions/LiveCodingSolutions.csproj" />
+  <Project Path="LiveCodingTests/LiveCodingTests.csproj" />
+</Solution>
