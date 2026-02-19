@@ -1,0 +1,11 @@
+{
+  "name": "live-coding-exercises",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "decimal": "^0.0.2",
+    "decimal.js": "^10.6.0"
+  }
+}
