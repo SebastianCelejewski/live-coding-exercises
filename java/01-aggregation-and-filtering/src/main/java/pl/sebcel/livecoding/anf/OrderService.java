@@ -2,7 +2,6 @@ package pl.sebcel.livecoding.anf;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +21,14 @@ public class OrderService {
 		return true;
 	}
 	
+	/**
+	 * Requirements:
+	 * <ul>
+	 *   <li>Aggregate total amount ignoring the currency (1 EUR = 1 USD = 1 PLN etc.)</li>
+	 * </ul>
+	 * @param orders list of orders
+	 * @return map from client to total amount
+	 */
 	public Map<String, BigDecimal> calculateTotalPerClient(List<Order> orders) {
 		if (orders == null) {
 			return Collections.emptyMap();
@@ -30,7 +37,7 @@ public class OrderService {
 		return orders
 				.stream()
 				.filter(OrderService::isValid)
-				.collect(Collectors.toMap(Order::customer, Order::amount, BigDecimal::add));		
+				.collect(Collectors.toMap(Order::customer, Order::amount, BigDecimal::add));
 	}
 	
 	/**
@@ -82,7 +89,7 @@ public class OrderService {
 				.collect(Collectors.toMap(
 						Map.Entry::getKey,
 						Map.Entry::getValue,
-						(a, b) -> a,
+						(a, _) -> a,
 						LinkedHashMap::new));
 	}
 

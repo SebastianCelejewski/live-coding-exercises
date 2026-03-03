@@ -41,7 +41,7 @@ public class GetTopCustomersInEUR {
 	}
 	
 	@Test
-	public void should_throw_ArgumentNullException_if_minimum_total_is_negative() {
+	public void should_throw_IllegalArgumentException_if_minimum_total_is_negative() {
 		assertThrows(IllegalArgumentException.class, () -> {
 			cut.getTopCustomersInEUR(createOrders(), createExchangeRates(), new BigDecimal("-5.0"), 10);
 		});
@@ -64,8 +64,8 @@ public class GetTopCustomersInEUR {
 	@Test
 	public void should_return_total_amount_in_EUR() {
 		Map<String, BigDecimal> result = cut.getTopCustomersInEUR(createOrders(), createExchangeRates(), new BigDecimal("0.0"), 99);
-		assertEquals(0, new BigDecimal("8.0").compareTo(result.get("A")));
-		assertEquals(0, new BigDecimal("24.5").compareTo(result.get("B")));
+		assertEquals(0, new BigDecimal("4.25").compareTo(result.get("A")));
+		assertEquals(0, new BigDecimal("9.5").compareTo(result.get("B")));
 	}
 
 	@Test
@@ -73,8 +73,8 @@ public class GetTopCustomersInEUR {
 		List<Order> orders = createOrders();
 		orders.add(null);
 		Map<String, BigDecimal> result = cut.getTopCustomersInEUR(orders, createExchangeRates(), new BigDecimal("0.0"), 99);
-		assertEquals(0, new BigDecimal("8.0").compareTo(result.get("A")));
-		assertEquals(0, new BigDecimal("24.5").compareTo(result.get("B")));
+		assertEquals(0, new BigDecimal("4.25").compareTo(result.get("A")));
+		assertEquals(0, new BigDecimal("9.5").compareTo(result.get("B")));
 	}
 
 	@Test
@@ -82,8 +82,8 @@ public class GetTopCustomersInEUR {
 		List<Order> orders = createOrders();
 		orders.add(new Order(null, new BigDecimal("1.0"), "PLN"));
 		Map<String, BigDecimal> result = cut.getTopCustomersInEUR(orders, createExchangeRates(), new BigDecimal("0.0"), 99);
-		assertEquals(0, new BigDecimal("8.0").compareTo(result.get("A")));
-		assertEquals(0, new BigDecimal("24.5").compareTo(result.get("B")));
+		assertEquals(0, new BigDecimal("4.25").compareTo(result.get("A")));
+		assertEquals(0, new BigDecimal("9.5").compareTo(result.get("B")));
 	}
 
 	@Test
@@ -91,8 +91,8 @@ public class GetTopCustomersInEUR {
 		List<Order> orders = createOrders();
 		orders.add(new Order("A", null, "PLN"));
 		Map<String, BigDecimal> result = cut.getTopCustomersInEUR(orders, createExchangeRates(), new BigDecimal("0.0"), 99);
-		assertEquals(0, new BigDecimal("8.0").compareTo(result.get("A")));
-		assertEquals(0, new BigDecimal("24.5").compareTo(result.get("B")));
+		assertEquals(0, new BigDecimal("4.25").compareTo(result.get("A")));
+		assertEquals(0, new BigDecimal("9.5").compareTo(result.get("B")));
 	}
 	
 	@Test
@@ -100,8 +100,8 @@ public class GetTopCustomersInEUR {
 		List<Order> orders = createOrders();
 		orders.add(new Order("A", new BigDecimal("1.0"), null));
 		Map<String, BigDecimal> result = cut.getTopCustomersInEUR(orders, createExchangeRates(), new BigDecimal("0.0"), 99);
-		assertEquals(0, new BigDecimal("8.0").compareTo(result.get("A")));
-		assertEquals(0, new BigDecimal("24.5").compareTo(result.get("B")));
+		assertEquals(0, new BigDecimal("4.25").compareTo(result.get("A")));
+		assertEquals(0, new BigDecimal("9.5").compareTo(result.get("B")));
 	}
 	
 	@Test
@@ -117,7 +117,7 @@ public class GetTopCustomersInEUR {
 	@Test
 	public void should_filter_out_customers_with_total_less_than_minTotalEUR() {
 		List<Order> orders = createOrders();
-		Map<String, BigDecimal> result = cut.getTopCustomersInEUR(orders, createExchangeRates(), new BigDecimal("20.0"), 99);
+		Map<String, BigDecimal> result = cut.getTopCustomersInEUR(orders, createExchangeRates(), new BigDecimal("8.0"), 99);
 		assertFalse(result.containsKey("A"));
 		assertTrue(result.containsKey("B"));
 	}
@@ -146,7 +146,7 @@ public class GetTopCustomersInEUR {
 	private List<ExchangeRate> createExchangeRates() {
 		List<ExchangeRate> result = new ArrayList<>();
 		
-		result.add(new ExchangeRate("PLN", new BigDecimal("4.0")));
+		result.add(new ExchangeRate("PLN", new BigDecimal("0.25")));
 		result.add(new ExchangeRate("USD", new BigDecimal("0.5")));
 		result.add(new ExchangeRate("EUR", new BigDecimal("1.")));
 		
