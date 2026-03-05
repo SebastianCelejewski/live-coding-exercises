@@ -16,7 +16,7 @@ import pl.sebcel.livecoding.anf.ExchangeRate;
 import pl.sebcel.livecoding.anf.Order;
 import pl.sebcel.livecoding.anf.OrderService;
 
-public class GetTopCustomersInEUR {
+public class GetTopCustomersInEurTests {
 	private OrderService cut = new OrderService();
 	
 	@Test
