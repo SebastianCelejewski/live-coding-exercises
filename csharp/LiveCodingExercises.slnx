@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="LiveCodingSolutions/LiveCodingSolutions.csproj" />
-  <Project Path="LiveCodingTests/LiveCodingTests.csproj" />
+  <Project Path="LINQtoObjects.Test/LINQtoObjects.Test.csproj" Id="8384833b-df80-4abb-9351-f30696a0015a" />
+  <Project Path="LINQtoObjects/LINQtoObjects.csproj" Id="d2db7a48-5d43-4907-9d30-f38e6c99c603" />
 </Solution>
