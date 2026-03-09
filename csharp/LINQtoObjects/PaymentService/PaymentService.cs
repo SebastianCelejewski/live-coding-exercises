@@ -26,10 +26,13 @@ namespace LiveCodingExercises.LINQtoObjects.PaymentService
             // y: IGrouping<string, {string Name, Employee e}>
             // z: IGrouping<string, Employee>
             return companies
-                .SelectMany(c => c.Departments, (c, d) => new { c.Name, d })    
-                .SelectMany(r => r.d.Employees, (r, e) => new { r.Name, e })    
+                .SelectMany(c => c.Departments, (c, d) => new { c.Name, Department = d })    
+                .SelectMany(r => r.Department.Employees, (r, e) => new { r.Name, Employee = e })    
                 .GroupBy(x => x.Name)                                           
-                .ToDictionary(y => y.Key, y => y.Select(z => z.e).OrderByDescending(e => e.Salary).Take(topN));             
+                .ToDictionary(y => y.Key, y => y
+                    .Select(z => z.Employee)
+                    .OrderByDescending(e => e.Salary)
+                    .Take(topN));             
         }
     }
 }
