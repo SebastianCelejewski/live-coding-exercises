@@ -11,11 +11,6 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
-import pl.sebcel.livecoding.javastreams.paymentservice.Company;
-import pl.sebcel.livecoding.javastreams.paymentservice.Department;
-import pl.sebcel.livecoding.javastreams.paymentservice.Employee;
-import pl.sebcel.livecoding.javastreams.paymentservice.PaymentService;
-
 public class GetTopPaidEmployeesPerCompanyTests {
 
 	private PaymentService cut = new PaymentService();

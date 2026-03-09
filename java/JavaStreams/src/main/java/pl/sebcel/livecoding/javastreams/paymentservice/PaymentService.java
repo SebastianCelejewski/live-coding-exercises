@@ -11,7 +11,7 @@ public class PaymentService {
 	 * Returns list of top N employees with the highest salary per company
 	 * 
 	 * @param companies list of companies with their employees per department
-	 * @param topN number of employees with the highest salary to return
+	 * @param topN number of employees with the highest salary to return per company
 	 * @return list of top N employees with the highest salary per company
 	 */
 	public Map<String, List<Employee>> getTopPaidEmployeesPerCompany(List<Company> companies, int topN) {
