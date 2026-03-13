@@ -1,7 +1,6 @@
 package pl.sebcel.livecoding.javastreams.employeeservice;
 
 import java.security.InvalidParameterException;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +15,21 @@ public class EmployeeService {
 		
 		return companies
 				.stream() // Stream<Company>
-				.flatMap(c -> c.departments().stream().map(d -> Map.entry(c.name(), d))) // Stream<Map.Entry<String, Department>>
-				.flatMap(kv -> kv.getValue().employees().stream().map(e -> Map.entry(kv.getKey(), e))) // Stream<Map.Entry<String, Employee>>
+				.peek(c -> {
+					if (c.departments() == null) {
+						throw new IllegalArgumentException();
+					}
+				})
+				.flatMap(c -> c.departments()
+								.stream()
+								.peek(d -> {
+									if (d.employees() == null) {
+										throw new IllegalArgumentException();
+									}
+								})
+								.flatMap(d -> d.employees()
+										.stream()
+										.map(e -> Map.entry(c.name(), e))))
 				.collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList()))) // Map<String, List<Employee>>
 				.entrySet() // Set<Map.Entry<String, List<Employee>>>
 				.stream() // Stream<Map.Entry<String, List<Employee>>>
