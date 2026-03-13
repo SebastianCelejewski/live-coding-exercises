@@ -1,6 +1,5 @@
 package pl.sebcel.livecoding.javastreams.employeeservice;
 
-import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,46 +8,46 @@ import java.util.stream.Collectors;
 public class EmployeeService {
 
 	public Map<String, List<Employee>> getMostFrequentEmployeesPerCompany(List<Company> companies) {
-		if (companies == null) {
-			throw new InvalidParameterException();
-		}
+		validateInput(companies);
 		
 		return companies
 				.stream() // Stream<Company>
-				.peek(c -> {
-					if (c.departments() == null) {
-						throw new IllegalArgumentException();
-					}
-				})
 				.flatMap(c -> c.departments()
 								.stream()
-								.peek(d -> {
-									if (d.employees() == null) {
-										throw new IllegalArgumentException();
-									}
-								})
-								.flatMap(d -> d.employees()
-										.stream()
-										.map(e -> Map.entry(c.name(), e))))
-				.collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList()))) // Map<String, List<Employee>>
-				.entrySet() // Set<Map.Entry<String, List<Employee>>>
-				.stream() // Stream<Map.Entry<String, List<Employee>>>
-				.map(x -> Map.entry(x.getKey(), getMostFrequentEmployeesPerSingleCompany(x.getValue()))) // Stream<Map.Entry<String, List<Employee>>>
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+								.flatMap(d -> d.employees().stream().map(e -> Map.entry(c.name(), e)))
+								)
+				.collect(Collectors.collectingAndThen(
+						Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())
+						),
+						x -> x.entrySet()
+								.stream()
+								.collect(Collectors.toMap(Map.Entry::getKey, y -> getMostFrequentEmployeesPerSingleCompany(y.getValue())
+								)
+						)
+				));
 	}
 	
-	record EmpWithCount(String name, Integer count) {}
-
+	private void validateInput(List<Company> companies) {
+		if (companies == null) {
+			throw new IllegalArgumentException();
+		}
+		for (Company c : companies) {
+			if (c.departments() == null) {
+				throw new IllegalArgumentException();
+			}
+			for (Department d: c.departments()) {
+				if (d.employees() == null) {
+					throw new IllegalArgumentException();
+				}
+			}
+		}
+	}
 	
 	private List<Employee> getMostFrequentEmployeesPerSingleCompany(List<Employee> employees) {
-		
 		Map<Employee, Integer> count = new HashMap<>();
 		for(Employee e : employees) {
 			count.merge(e, 1,  Integer::sum);
 		}
-		
-		// count: Map<Employee, Integer>
-		// r: Map.Entry<Employee, Integer>
 		
 		List<Employee> result = count   // Map<Employee, Integer>
 			.entrySet()  // Set<Map.Entry<Employee, Integer>>

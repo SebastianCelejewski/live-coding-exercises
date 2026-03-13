@@ -16,7 +16,7 @@ public class GetMostFrequentEmployeesPerCompanyTests {
 	
 	@Test
 	public void should_throw_IllegalArgumentException_when_companies_are_null() {
-		assertThrows(InvalidParameterException.class, () -> cut.getMostFrequentEmployeesPerCompany(null));
+		assertThrows(IllegalArgumentException.class, () -> cut.getMostFrequentEmployeesPerCompany(null));
 	}
 	
 	@Test
