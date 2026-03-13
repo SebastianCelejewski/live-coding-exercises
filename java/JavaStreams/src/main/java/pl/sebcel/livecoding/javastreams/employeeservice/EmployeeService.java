@@ -36,21 +36,8 @@ public class EmployeeService {
 	}
 	
 	private List<Employee> getMostFrequentEmployeesPerSingleCompany(List<Employee> employees) {
-		Map<Employee, Integer> count = new HashMap<>();
-		for(Employee e : employees) {
-			count.merge(e, 1,  Integer::sum);
-		}
-		
-		List<Employee> result = count   // Map<Employee, Integer>
-			.entrySet()  // Set<Map.Entry<Employee, Integer>>
-			.stream()    // Stream<Map.Entry<Employee, Integer>>
-			.collect(Collectors.groupingBy(Map.Entry<Employee, Integer>::getValue, Collectors.mapping(x -> x.getKey(), Collectors.toList())))  // Map<Integer, List<Employee>>
-			.entrySet() // Set<Map.Entry<Integer, List<Employee>>>
-			.stream() // Stream<Map.Entry<Integer, List<Employee>>>
-			.max(Map.Entry.comparingByKey()) // Optional<Map.Entry<Integer, List<Employee>>>
-			.orElseThrow() // <Map.Entry<Integer, List<Employee>>
-			.getValue(); //List<Employee>
-
-		return result;
+		Map<Employee, Integer> counts = employees.stream().collect(Collectors.groupingBy(e -> e, Collectors.summingInt(_ -> 1)));
+		int max = counts.values().stream().max(Integer::compare).orElseThrow();
+		return counts.entrySet().stream().filter(kv -> kv.getValue().equals(max)).map(ku -> ku.getKey()).toList();
 	}
 }
