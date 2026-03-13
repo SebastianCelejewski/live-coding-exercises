@@ -11,20 +11,12 @@ public class EmployeeService {
 		validateInput(companies);
 		
 		return companies
-				.stream() // Stream<Company>
-				.flatMap(c -> c.departments()
+				.stream()
+				.collect(Collectors.toMap(
+						Company::name,
+						c -> getMostFrequentEmployeesPerSingleCompany(c.departments()
 								.stream()
-								.flatMap(d -> d.employees().stream().map(e -> Map.entry(c.name(), e)))
-								)
-				.collect(Collectors.collectingAndThen(
-						Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())
-						),
-						x -> x.entrySet()
-								.stream()
-								.collect(Collectors.toMap(Map.Entry::getKey, y -> getMostFrequentEmployeesPerSingleCompany(y.getValue())
-								)
-						)
-				));
+								.flatMap(d -> d.employees().stream()).toList())));
 	}
 	
 	private void validateInput(List<Company> companies) {
