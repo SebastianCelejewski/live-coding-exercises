@@ -15,23 +15,23 @@ public class GetMostFrequentEmployeesPerCompanyTests {
 	private EmployeeService cut = new EmployeeService();
 	
 	@Test
-	public void should_throw_IllegalArgumentException_when_companies_are_null() {
-		assertThrows(IllegalArgumentException.class, () -> cut.getMostFrequentEmployeesPerCompany(null));
+	public void should_throw_NullPointerException_when_companies_are_null() {
+		assertThrows(NullPointerException.class, () -> cut.getMostFrequentEmployeesPerCompany(null));
 	}
 	
 	@Test
-	public void should_throw_IllegalArgumentException_when_list_of_departments_for_a_company_is_null() {
+	public void should_throw_NullPointerException_when_list_of_departments_for_a_company_is_null() {
 		Company companyWithNullDepartments = new Company("A", null);
-		assertThrows(IllegalArgumentException.class, () -> {
+		assertThrows(NullPointerException.class, () -> {
 			cut.getMostFrequentEmployeesPerCompany(List.of(companyWithNullDepartments));
 		});
 	}
 
 	@Test
-	public void should_throw_IllegalArgumentException_when_list_of_employees_for_a_department_is_null() {
+	public void should_throw_NullPointerException_when_list_of_employees_for_a_department_is_null() {
 		Department departmentWithNullEmployees = new Department("Null", null);
 		Company company = new Company("A", List.of(departmentWithNullEmployees));
-		assertThrows(IllegalArgumentException.class, () -> {
+		assertThrows(NullPointerException.class, () -> {
 			cut.getMostFrequentEmployeesPerCompany(List.of(company));
 		});
 	}

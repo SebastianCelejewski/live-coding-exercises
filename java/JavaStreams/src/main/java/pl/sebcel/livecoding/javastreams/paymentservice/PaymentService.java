@@ -3,6 +3,7 @@ package pl.sebcel.livecoding.javastreams.paymentservice;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class PaymentService {
@@ -15,35 +16,51 @@ public class PaymentService {
 	 * @return list of top N employees with the highest salary per company
 	 */
 	public Map<String, List<Employee>> getTopPaidEmployeesPerCompany(List<Company> companies, int topN) {
-		
-		if (companies == null) {
-			throw new IllegalArgumentException();
-		}
+		validateInput(companies, topN);
 		
 		return companies
 				.stream()
-				.peek(this::throwExceptionWhenCompanyHasNullDepartments)
-				.collect(Collectors.toMap(Company::name, c -> c.departments()
-						.stream()
-						.peek(this::throwExceptionWhenDepartmentHasNullEmployees)
-						.flatMap(d -> d.employees().stream())
-						.sorted(Comparator.comparing(Employee::salary).reversed())
-						.limit(topN)
-						.toList(), (a, _) -> a));
+				.collect(Collectors.toMap(
+						Company::name,
+						c -> c.departments()
+								.stream()
+								.flatMap(d -> d.employees().stream())
+								.sorted(Comparator.comparing(Employee::salary).reversed())
+								.limit(topN)
+								.toList()
+						));
 	}
 	
-	private Company throwExceptionWhenCompanyHasNullDepartments(Company company) {
-		if (company.departments() == null) {
+	public Map<String, Employee> getHighestPaidEmployeePerCompany(List<Company> companies) {
+		validateInput(companies);
+		return companies.stream()
+				.collect(Collectors.toMap(
+						Company::name,
+						c -> c.departments()
+								.stream()
+								.flatMap(d -> d.employees().stream())
+								.max(Comparator.comparing(Employee::salary)).orElseThrow()
+						));
+	}
+	
+	
+	private void validateInput(List<Company> companies, int topN) {
+		if (topN < 0) {
 			throw new IllegalArgumentException();
 		}
-		return company;
-	}
-	
 
-	private Department throwExceptionWhenDepartmentHasNullEmployees(Department department) {
-		if (department.employees() == null) {
-			throw new IllegalArgumentException();
-		}
-		return department;
+		validateInput(companies);
 	}
+	
+	private void validateInput(List<Company> companies) {
+		Objects.requireNonNull(companies);
+
+		for (Company c: companies) {
+			Objects.requireNonNull(c.departments());
+			for (Department d : c.departments()) {
+				Objects.requireNonNull(d.employees());
+			}
+		}
+	}
+
 }

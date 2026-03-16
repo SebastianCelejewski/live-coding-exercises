@@ -12,29 +12,25 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import pl.sebcel.livecoding.javastreams.orderservice.ExchangeRate;
-import pl.sebcel.livecoding.javastreams.orderservice.Order;
-import pl.sebcel.livecoding.javastreams.orderservice.OrderService;
-
 public class GetTopCustomersInEurTests {
 	private OrderService cut = new OrderService();
 	
 	@Test
-	public void should_throw_ArgumentNullException_if_list_of_orders_is_null() {
+	public void should_throw_NullPointerException_if_list_of_orders_is_null() {
 		assertThrows(NullPointerException.class, () -> {
 			cut.getTopCustomersInEUR(null, createExchangeRates(), new BigDecimal("0.0"), 10);
 		});
 	}
 
 	@Test
-	public void should_throw_ArgumentNullException_if_list_of_exchange_rates_is_null() {
+	public void should_throw_NullPointerException_if_list_of_exchange_rates_is_null() {
 		assertThrows(NullPointerException.class, () -> {
 			cut.getTopCustomersInEUR(createOrders(), null, new BigDecimal("0.0"), 10);
 		});
 	}
 
 	@Test
-	public void should_throw_ArgumentNullException_if_minimum_total_is_null() {
+	public void should_throw_NullPointerException_if_minimum_total_is_null() {
 		assertThrows(NullPointerException.class, () -> {
 			cut.getTopCustomersInEUR(createOrders(), createExchangeRates(), null, 10);
 		});

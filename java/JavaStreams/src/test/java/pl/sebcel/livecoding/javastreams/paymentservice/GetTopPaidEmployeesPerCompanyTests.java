@@ -16,25 +16,25 @@ public class GetTopPaidEmployeesPerCompanyTests {
 	private PaymentService cut = new PaymentService();
 	
 	@Test
-	public void should_throw_IllegalArgumentException_when_list_of_companies_is_null() {
-		assertThrows(IllegalArgumentException.class, () -> {
+	public void should_throw_NullPointerException_when_list_of_companies_is_null() {
+		assertThrows(NullPointerException.class, () -> {
 			cut.getTopPaidEmployeesPerCompany(null, 3);
 		});
 	}
 	
 	@Test
-	public void should_throw_IllegalArgumentException_when_list_of_departments_for_a_company_is_null() {
+	public void should_throw_NullPointerException_when_list_of_departments_for_a_company_is_null() {
 		Company companyWithNullDepartments = new Company("A", null);
-		assertThrows(IllegalArgumentException.class, () -> {
+		assertThrows(NullPointerException.class, () -> {
 			cut.getTopPaidEmployeesPerCompany(List.of(companyWithNullDepartments), 3);
 		});
 	}
 
 	@Test
-	public void should_throw_IllegalArgumentException_when_list_of_employees_for_a_department_is_null() {
+	public void should_throw_NullPointerException_when_list_of_employees_for_a_department_is_null() {
 		Department departmentWithNullEmployees = new Department("Null", null);
 		Company company = new Company("A", List.of(departmentWithNullEmployees));
-		assertThrows(IllegalArgumentException.class, () -> {
+		assertThrows(NullPointerException.class, () -> {
 			cut.getTopPaidEmployeesPerCompany(List.of(company), 3);
 		});
 	}
