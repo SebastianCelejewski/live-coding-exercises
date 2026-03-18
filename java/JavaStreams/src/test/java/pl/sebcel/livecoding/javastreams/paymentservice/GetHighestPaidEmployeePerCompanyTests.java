@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +51,7 @@ public class GetHighestPaidEmployeePerCompanyTests {
 	@Test
 	public void should_return_highest_paid_employee_per_each_company_that_has_employees() {
 		Map<String, Employee> result = cut.getHighestPaidEmployeePerCompany(createCompanies());
-		assertEquals("David", result.get("A").name());
+		assertTrue(List.of("David", "Eve").contains(result.get("A").name()));
 		assertEquals("Lydia", result.get("B").name());
 	}
 

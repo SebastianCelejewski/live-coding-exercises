@@ -24,6 +24,17 @@ namespace LiveCodingExercises.LINQtoObjects.PaymentService
                         .ToDictionary(kv => kv.Key, kv => GetTopPaidEmployeesPerSingleCompany(kv.Select(x => x.Employee), topN));
         }
 
+        public IDictionary<string, Employee> GetHighestPaidEmployeePerCompany(IEnumerable<Company> companies)
+        {
+            ValidateInput(companies);
+            return companies
+                .SelectMany(c => c.Departments, (c, d) => new { Company = c, Department = d })
+                .SelectMany(cd => cd.Department.Employees, (cd, e) => new { Company = cd.Company, Employee = e })
+                .GroupBy(g => g.Company.Name)
+                .Select(h => new { h.Key, Employee = h.Select(x => x.Employee).OrderBy(e => e.Salary).Reverse().First() })
+                .ToDictionary(i => i.Key, i => i.Employee);
+        }
+
         private IEnumerable<Employee> GetTopPaidEmployeesPerSingleCompany(IEnumerable<Employee> employees, int topN)
         {
             return employees.OrderBy(o => o.Salary).Reverse().Take(topN);
@@ -31,8 +42,13 @@ namespace LiveCodingExercises.LINQtoObjects.PaymentService
 
         private void ValidateInput(IEnumerable<Company> companies, int topN)
         {
-            ArgumentNullException.ThrowIfNull(companies);
             ArgumentOutOfRangeException.ThrowIfNegative(topN);
+            ValidateInput(companies);
+        }
+
+        private void ValidateInput(IEnumerable<Company> companies)
+        {
+            ArgumentNullException.ThrowIfNull(companies);
             foreach (Company c in companies)
             {
                 ArgumentNullException.ThrowIfNull(c.Departments);
