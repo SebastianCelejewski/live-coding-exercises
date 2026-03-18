@@ -72,7 +72,7 @@ public class GetMostFrequentEmployeesPerCompanyTests {
 						dep("Sales",
 								emp("Tom"),
 								emp("Jerry")),
-						dep("Sales",
+						dep("HR",
 								emp("Tom"),
 								emp("Jerry")))
 				);

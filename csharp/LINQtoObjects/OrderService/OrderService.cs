@@ -8,10 +8,7 @@ namespace LiveCodingExercises.LINQtoObjects.OrderService
     {
         public IReadOnlyDictionary<string, decimal> GetTotalAmountPerCustomer(IEnumerable<Order> orders)
         {
-            if (orders == null)
-            {
-                return new Dictionary<string, decimal>();
-            }
+            ArgumentNullException.ThrowIfNull(orders);
 
             return orders
                 .GroupBy(o => o.Customer)
@@ -20,31 +17,34 @@ namespace LiveCodingExercises.LINQtoObjects.OrderService
 
         public IReadOnlyDictionary<string, decimal> GetTopCustomersInEUR(IEnumerable<Order> orders, IEnumerable<ExchangeRate> exchangeRates, decimal minTotalEur, int topN)
         {
+            ValidateInput(orders, exchangeRates, minTotalEur, topN);
+            IDictionary<string, decimal> currencyMapping = exchangeRates.ToDictionary(e => e.Currency, e => e.RateToEur);
+
+            return orders
+                .Select(o => new { o.Customer, Amount = o.Amount * currencyMapping[o.Currency] })
+                .GroupBy(f => f.Customer)
+                .ToDictionary(g => g.Key, g => g.Sum(o => o.Amount))
+                .Where(h => h.Value.CompareTo(minTotalEur) > 0)
+                .OrderBy(i => i.Value)
+                .Reverse()
+                .Take(topN)
+                .ToDictionary(x => x.Key, x => x.Value);
+        }
+
+        private void ValidateInput(IEnumerable<Order> orders, IEnumerable<ExchangeRate> exchangeRates, decimal minTotalEur, int topN)
+        {
             ArgumentNullException.ThrowIfNull(orders);
             ArgumentNullException.ThrowIfNull(exchangeRates);
             ArgumentOutOfRangeException.ThrowIfNegative(minTotalEur);
             ArgumentOutOfRangeException.ThrowIfNegative(topN);
 
-            Dictionary<string, decimal> requiredExchangeRates = exchangeRates.ToDictionary(x => x.Currency, x => x.RateToEur);
-
-            return orders
-                .Select(x => ConvertExchangeRate(x, requiredExchangeRates))
-                .GroupBy(x => x.Customer)
-                .Select(g => new { Customer = g.Key, Total = g.Sum(o => o.Amount)})
-                .Where(x => x.Total >= minTotalEur)
-                .OrderByDescending(x => x.Total)
-                .Take(topN)
-                .ToDictionary(x => x.Customer, x => x.Total);
-        }
-
-        private Order ConvertExchangeRate(Order order, Dictionary<string, decimal> exchangeRates)
-        {
-            if (!exchangeRates.TryGetValue(order.Currency, out var rate))
+            List<string> availableCurrencies = exchangeRates.Select(e => e.Currency).ToList();
+            
+            Order? invalidOrder = orders.FirstOrDefault(o => !availableCurrencies.Contains(o.Currency));
+            if (invalidOrder != null)
             {
-                throw new MissingExchangeRateException(order.Currency);
+                throw new MissingExchangeRateException(invalidOrder.Currency);
             }
-
-            return new Order(order.Customer, order.Amount * rate, "EUR");
         }
     }
 }

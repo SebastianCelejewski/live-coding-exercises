@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PaymentService {
@@ -31,6 +32,14 @@ public class PaymentService {
 						));
 	}
 	
+	/**
+	 * Returns the highest paid employee per each company
+	 * 
+	 * If a company has no employees, it does not appear in the result
+	 * 
+	 * @param companies companies for which to find the highest paid employee
+	 * @return mapping between companies and the highest paid employees for that company
+	 */
 	public Map<String, Employee> getHighestPaidEmployeePerCompany(List<Company> companies) {
 		validateInput(companies);
 		return companies.stream()
@@ -39,8 +48,12 @@ public class PaymentService {
 						c -> c.departments()
 								.stream()
 								.flatMap(d -> d.employees().stream())
-								.max(Comparator.comparing(Employee::salary)).orElseThrow()
-						));
+								.max(Comparator.comparing(Employee::salary))
+						))
+				.entrySet()
+				.stream()
+				.filter(kv -> kv.getValue().isPresent())
+				.collect(Collectors.toMap(kv -> kv.getKey(), kv -> kv.getValue().get()));
 	}
 	
 	

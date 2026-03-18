@@ -33,7 +33,7 @@ public class EmployeeService {
 	
 	private List<Employee> getMostFrequentEmployeesPerSingleCompany(List<Employee> employees) {
 		Map<Employee, Integer> counts = employees.stream()
-											.collect(Collectors.toMap(Function.identity(), e -> 1, (a, b) -> a + b));
+											.collect(Collectors.toMap(Function.identity(), _ -> 1, (a, b) -> a + b));
 		int max = counts.entrySet()
 					.stream()
 					.sorted(Map.Entry.<Employee, Integer>comparingByValue().reversed())
