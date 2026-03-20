@@ -1,7 +1,6 @@
 package pl.sebcel.livecoding.javastreams.salesservice;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -48,7 +47,7 @@ public class GetTopCustomersPerCountry {
 	@Test
 	public void should_return_all_customers_if_there_are_less_customers_than_topN() {
 		Map<String, List<CustomerExpenses>> result = cut.getTopCustomersPerCountry(createOrders(), 5);
-		assertThatResultContainsExactCustomers(result, "PL", "A", "B");
+		assertThatResultContainsExactCustomers(result, "PL", "A", "B", "C");
 		assertThatResultContainsExactCustomers(result, "DE", "X", "Y", "Z");
 	}
 
