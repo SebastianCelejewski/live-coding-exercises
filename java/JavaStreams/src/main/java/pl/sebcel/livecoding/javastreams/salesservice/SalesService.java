@@ -22,45 +22,34 @@ public class SalesService {
 	 * @return list of top customers with sums of their orders per country
 	 */
 	public Map<String, List<CustomerExpenses>> getTopCustomersPerCountry(List<Order> orders, int topN) {
-		validateInput(orders, topN);
-		
-		return orders.stream()
-				.collect(Collectors.groupingBy(
-						Order::country,
-						Collectors.collectingAndThen(
-								Collectors.toMap(Order::customerId, Order::amount, BigDecimal::add),
-								x -> x.entrySet()
-									.stream()
-									.sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
-									.limit(topN)
-									.map(kv -> new CustomerExpenses(kv.getKey(), kv.getValue()))
-									.collect(Collectors.toList())
-								)
-						)
-				);
-				
-				
-		// pogrupować po kraju
-		// zsumować amounts dla każdego klienta
-		// zmapować na CustomerExpenses
-		// posortować malejąco po amount
-		// wybrać ileś początkowych
-		// zrobić mapę
-	}
-	
-	private void validateInput(List<Order> orders, int topN) {
 		Objects.requireNonNull(orders);
 		if (topN < 0) {
 			throw new IllegalArgumentException();
 		}
 		
-		for (Order o: orders) {
-			Objects.requireNonNull(o.customerId());
-			Objects.requireNonNull(o.country());
-			Objects.requireNonNull(o.amount());
-			if (o.amount().compareTo(BigDecimal.ZERO) < 0) {
-				throw new IllegalArgumentException();
-			}
-		}
+		// group by country   -> Map<String, List<Order>>
+		// inside country
+		//   customer-amount aggregate by amount (sum)   ->     List<Order> -> Map<String, BigDecimal> (aggregation, sum)
+		//   sort by aggregated amount desc
+		//   take topN
+		
+		
+		return orders
+				.stream()
+				.collect(Collectors.groupingBy(
+						Order::country,						// Map<String, List<Order>>
+						Collectors.collectingAndThen(
+							Collectors.toMap(
+									Order::customerId,			// Map<String, Map<String, List<Order>>>
+									Order::amount,
+									BigDecimal::add),
+							x -> x.entrySet()
+									.stream()
+									.sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+									.limit(topN)
+									.map(e -> new CustomerExpenses(e.getKey(), e.getValue())).toList() // Map<String, List<CustomerExpenses>>
+						)));  
+				
 	}
+	
 }

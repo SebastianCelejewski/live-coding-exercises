@@ -20,16 +20,16 @@ public class PaymentService {
 		
 		return companies
 				.stream()
-				.collect(Collectors.toMap(
-						Company::name,
-						c -> c.departments()
-								.stream()
-								.flatMap(d -> d.employees().stream())
-								.sorted(Comparator.comparing(Employee::salary).reversed())
-								.limit(topN)
-								.toList()
-						));
+				.collect(Collectors.toMap(Company::name, c -> c.departments()
+																	.stream()
+																	.flatMap(d -> d.employees().stream())
+																	.sorted(Comparator.comparing(Employee::salary).reversed())
+																	.limit(topN)
+																	.collect(Collectors.toList())
+										)
+						);
 	}
+	
 	
 	/**
 	 * Returns the highest paid employee per each company
@@ -41,7 +41,9 @@ public class PaymentService {
 	 */
 	public Map<String, Employee> getHighestPaidEmployeePerCompany(List<Company> companies) {
 		validateInput(companies);
-		return companies.stream()
+		
+		return companies
+				.stream()
 				.collect(Collectors.toMap(
 						Company::name,
 						c -> c.departments()
@@ -51,28 +53,23 @@ public class PaymentService {
 						))
 				.entrySet()
 				.stream()
-				.filter(kv -> kv.getValue().isPresent())
-				.collect(Collectors.toMap(kv -> kv.getKey(), kv -> kv.getValue().get()));
-	}
-	
-	
-	private void validateInput(List<Company> companies, int topN) {
-		if (topN < 0) {
-			throw new IllegalArgumentException();
-		}
-
-		validateInput(companies);
+				.filter(e -> e.getValue().isPresent()).collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get()));
 	}
 	
 	private void validateInput(List<Company> companies) {
 		Objects.requireNonNull(companies);
-
-		for (Company c: companies) {
+		for (Company c : companies) {
 			Objects.requireNonNull(c.departments());
-			for (Department d : c.departments()) {
+			for (Department d: c.departments()) {
 				Objects.requireNonNull(d.employees());
 			}
 		}
 	}
-
+	
+	private void validateInput(List<Company> companies, int topN) {
+		validateInput(companies);
+		if (topN < 0) {
+			throw new IllegalArgumentException();
+		}
+	}
 }

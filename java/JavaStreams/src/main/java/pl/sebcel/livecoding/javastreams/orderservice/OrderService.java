@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class OrderService {
@@ -27,11 +28,8 @@ public class OrderService {
 				.collect(Collectors.toMap(Order::customer, Order::amount, BigDecimal::add));
 	}
 	
-	private boolean isValid(Order o) {
-		if (o == null) {
-			return false;
-		}
-		if (o.customer() == null || o.amount() == null || o.currency() == null) {
+	private boolean isValid(Order order) {
+		if (order == null || order.amount() == null || order.currency() == null || order.customer() == null) {
 			return false;
 		}
 		return true;
@@ -61,32 +59,49 @@ public class OrderService {
 		BigDecimal minTotalEUR,
 		int topN
 	) {
-		if (orders == null || exchangeRates == null ) {
-			throw new NullPointerException();
-		}
+		// group by customer
+		// convert to EUR
+		// aggregate by amount
+		// filter out amount < minTotalEUR
+		// return topN
 		
-		if (minTotalEUR.compareTo(new BigDecimal("0.0")) < 0 || topN < 0) {
-			throw new IllegalArgumentException();
-		}
+		validateInput(orders, exchangeRates, minTotalEUR, topN);
 		
-		Map<String, BigDecimal> exchangeRatesMapping = exchangeRates.stream().collect(Collectors.toMap(ExchangeRate::currency, ExchangeRate::rateToEUR));
+		Map<String, BigDecimal> exchangeRatesMap = exchangeRates.stream().collect(Collectors.toMap(ExchangeRate::currency, ExchangeRate::rateToEUR));
 		
-		return orders
-				.stream()
+		return orders.stream()
 				.filter(this::isValid)
-				.peek(o -> {
-					if (!exchangeRatesMapping.containsKey(o.currency())) {
-						throw new IllegalArgumentException(o.currency());
-					}
-				})
-				.map(o -> new Order(o.customer(), o.amount().multiply(exchangeRatesMapping.get(o.currency())), "EUR"))
-				.collect(Collectors.toMap(Order::customer, Order::amount, BigDecimal::add))
-				.entrySet()
-				.stream()
-				.filter(oe -> oe.getValue().compareTo(minTotalEUR) > 0)
+				.collect(Collectors.toMap(Order::customer, o -> convertToEur(o, exchangeRatesMap), BigDecimal::add))
+				.entrySet().stream()
+				.filter(e -> e.getValue().compareTo(minTotalEUR) >= 0)
 				.sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
 				.limit(topN)
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, _) -> a, LinkedHashMap::new));
 	}
-
+	
+	private BigDecimal convertToEur(Order order, Map<String, BigDecimal> exchangeRatesMap) {
+		String currency = order.currency();
+		BigDecimal amount = order.amount();
+		if (!exchangeRatesMap.containsKey(currency)) {
+			throw new IllegalArgumentException(currency);
+		}
+		return exchangeRatesMap.get(currency).multiply(amount);
+	}
+	
+	private void validateInput(
+			List<Order> orders,
+			List<ExchangeRate> exchangeRates,
+			BigDecimal minTotalEUR,
+			int topN
+		) {
+		Objects.requireNonNull(orders);
+		Objects.requireNonNull(exchangeRates);
+		Objects.requireNonNull(minTotalEUR);
+		if (topN < 0) {
+			throw new IllegalArgumentException();
+		}
+		if (minTotalEUR.compareTo(BigDecimal.ZERO) < 0) {
+			throw new IllegalArgumentException();
+		}
+	}
 }

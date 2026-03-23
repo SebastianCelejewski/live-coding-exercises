@@ -11,9 +11,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import pl.sebcel.livecoding.javastreams.orderservice.Order;
-import pl.sebcel.livecoding.javastreams.orderservice.OrderService;
-
 public class CalculateTotalPerClientTests {
 
 	private OrderService cut = new OrderService();
