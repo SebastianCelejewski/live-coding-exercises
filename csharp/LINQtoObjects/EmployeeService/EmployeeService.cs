@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 
 namespace LiveCodingExercises.LINQtoObjects.EmployeeService
@@ -10,11 +9,7 @@ namespace LiveCodingExercises.LINQtoObjects.EmployeeService
         public IDictionary<string, IEnumerable<Employee>> GetMostFrequentEmployeesPerCompany(IEnumerable<Company> companies)
         {
             ValidateInput(companies);
-            return companies
-                        .SelectMany(c => c.Departments, (c, d) => new { Company = c, Department = d })
-                        .SelectMany(cd => cd.Department.Employees, (cd, e) => new { Company = cd.Company, Employee = e })
-                        .GroupBy(g => g.Company)
-                        .ToDictionary(x => x.Key.Name, x => GetMostFrequentEmployeesPerSingleCompany(x.Select(v => v.Employee)));
+            return companies.ToDictionary(c => c.Name, c => GetMostFrequentEmployeesPerSingleCompany(c.Departments.SelectMany(d => d.Employees)));
         }
 
         private void ValidateInput(IEnumerable<Company> companies)
@@ -32,9 +27,9 @@ namespace LiveCodingExercises.LINQtoObjects.EmployeeService
         
         private IEnumerable<Employee> GetMostFrequentEmployeesPerSingleCompany(IEnumerable<Employee> employees)
         {
-            IDictionary<Employee, int> counts = employees.GroupBy(e => e).ToDictionary(kv => kv.Key, kv => kv.Sum(e => 1));
-            int max = counts.Max(kv => kv.Value);
-            return counts.Where(c => c.Value == max).Select(c => c.Key);
+            IDictionary<Employee, int> counts = employees.GroupBy(e => e).ToDictionary(e => e.Key, e => e.Count());
+            int max = counts.Values.Max();
+            return counts.Where(e => e.Value == max).Select(e => e.Key).ToList();
         }
     }
 }

@@ -16,34 +16,26 @@ namespace LiveCodingExercises.LINQtoObjects.PaymentService
         /// <exception cref="NotImplementedException"></exception>
         public IDictionary<string, IEnumerable<Employee>> GetTopPaidEmployeesPerCompany(IEnumerable<Company> companies, int topN)
         {
-            ValidateInput(companies, topN);
+            ValidateInput(companies);
+            ArgumentOutOfRangeException.ThrowIfNegative(topN);
+
             return companies
-                        .SelectMany(c => c.Departments, (c, d) => new { Company = c, Department = d })
-                        .SelectMany(cd => cd.Department.Employees, (cd, e) => new { cd.Company, Employee = e })
-                        .GroupBy(g => g.Company.Name)
-                        .ToDictionary(kv => kv.Key, kv => GetTopPaidEmployeesPerSingleCompany(kv.Select(x => x.Employee), topN));
+                .ToDictionary(
+                    c => c.Name,
+                    c => c.Departments
+                            .SelectMany(d => d.Employees)
+                            .OrderByDescending(e => e.Salary)
+                            .Take(topN));
         }
 
         public IDictionary<string, Employee> GetHighestPaidEmployeePerCompany(IEnumerable<Company> companies)
         {
             ValidateInput(companies);
             return companies
-                .SelectMany(c => c.Departments, (c, d) => new { Company = c, Department = d })
-                .SelectMany(cd => cd.Department.Employees, (cd, e) => new { Company = cd.Company, Employee = e })
-                .GroupBy(g => g.Company.Name)
-                .Select(h => new { h.Key, Employee = h.Select(x => x.Employee).OrderBy(e => e.Salary).Reverse().First() })
-                .ToDictionary(i => i.Key, i => i.Employee);
-        }
-
-        private IEnumerable<Employee> GetTopPaidEmployeesPerSingleCompany(IEnumerable<Employee> employees, int topN)
-        {
-            return employees.OrderBy(o => o.Salary).Reverse().Take(topN);
-        }
-
-        private void ValidateInput(IEnumerable<Company> companies, int topN)
-        {
-            ArgumentOutOfRangeException.ThrowIfNegative(topN);
-            ValidateInput(companies);
+                .GroupBy(c => c.Name)
+                .Select(g => new { CompanyName = g.Key, Employee = g.SelectMany(c => c.Departments).SelectMany(d => d.Employees).MaxBy(e => e.Salary) })
+                .Where(r => r.Employee != null)
+                .ToDictionary(r => r.CompanyName, r => r.Employee!);
         }
 
         private void ValidateInput(IEnumerable<Company> companies)
