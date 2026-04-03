@@ -118,6 +118,21 @@ namespace LiveCodingExercises.LINQtoObjects.Test.AdancedOrderService
             AssertThatResultContainsSpecificCustomers(result, "DE", "Z");
         }
 
+        [Fact]
+        public void TheSameListOfCustomersShouldBeReturnedIfTotalAmountsAreTheSame()
+        {
+            IDictionary<string, IEnumerable<CustomerReport>> result1 = cut.RunWith(CustomersWithSameTotalAmounts);
+
+            var reversedOrders = CustomersWithSameTotalAmounts.Orders.Reverse();
+
+            IDictionary<string, IEnumerable<CustomerReport>> result2 = cut.RunWith(SpecificOrders(reversedOrders));
+
+            string customerIds1 = string.Join("-", result1.Values.First().Select(x => x.customerId));
+            string customerIds2 = string.Join("-", result2.Values.First().Select(x => x.customerId));
+
+            Assert.Equal(customerIds1, customerIds2);
+        }
+
         private void AssertThatResultContainsSpecificCountries(IDictionary<string, IEnumerable<CustomerReport>> result, params string[] countries)
         {
             Assert.Equal(countries.Length, result.Keys.Count);
@@ -159,7 +174,7 @@ namespace LiveCodingExercises.LINQtoObjects.Test.AdancedOrderService
         {
             List<CustomerReport> reports = result[country].ToList();
             
-            for (int i = 1; i < reports.Count() - 1; i++) {
+            for (int i = 0; i < reports.Count() - 1; i++) {
                 Assert.True(reports[i + 1].totalEUR <= reports[i].totalEUR);
             }
         }

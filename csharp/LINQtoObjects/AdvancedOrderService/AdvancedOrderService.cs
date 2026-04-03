@@ -47,6 +47,7 @@ namespace LiveCodingExercises.LINQtoObjects.AdvancedOrderService
                                                     .Where(cr => cr.totalEUR >= minTotalEUR)
                                                     .Where(cr => cr.ordersCount >= minOrdersCount)
                                                     .OrderByDescending(cr => cr.totalEUR)
+                                                    .ThenBy(cr => cr.customerId)
                                                     .Take(topN)
                     );
         }
