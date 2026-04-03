@@ -23,17 +23,18 @@ public class AdvancedOrderService {
 	 *   </ul>
 	 * </li>
 	 * <li>List of consumer reports for a single country returns data for at most topN consumers</li>
-	 * <li>If an order contains currency that is not present in exchangeRates data, an exception must be thrown</li>
+	 * <li>If an order contains currency that is not present in exchangeRates data, an exception is thrown</li>
 	 * <li>List of consumer reports is sorted by total amounts descending</li>
-	 * <li>If two consumers have the same total amount, their order must be consistent,
-	 *   i.e. it does not matter which goes first on the list, but but this order must be preserved between method calls </li>
-	 * <li>An exception must be thrown if data is invalid, e.g. order is null or any value inside the order is null</li>   
+	 * <li>If two consumers have the same total amount, their order is be consistent,
+	 *   i.e. it does not matter which goes first on the list, but but this order is preserved between method calls </li>
+	 * <li>Consumer report contains the time stamp of the last operation for given customer</li>
+	 * <li>An exception is thrown if data is invalid, e.g. order is null or any value inside the order is null</li>   
 	 * </ul>
-	 * @param orders
-	 * @param exchangeRates
-	 * @param topN
-	 * @param minTotalEUR
-	 * @param minOrdersOunt
+	 * @param orders list of orders as an input
+	 * @param exchangeRates mapping between currencies and their rate to EUR
+	 * @param topN maximum number of customers to return for a single country
+	 * @param minTotalEUR minimal total amount for a customer to be included in a report
+	 * @param minOrdersOunt minimal number of orders for a customer to be included in a report
 	 * @return
 	 */
 	public Map<String, List<CustomerReport>> generateCustomerIntelligenceReport(
