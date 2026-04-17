@@ -28,7 +28,8 @@ public class AdvancedOrderService {
 	 * <li>If two consumers have the same total amount, their order is be consistent,
 	 *   i.e. it does not matter which goes first on the list, but but this order is preserved between method calls </li>
 	 * <li>Consumer report contains the time stamp of the last operation for given customer</li>
-	 * <li>An exception is thrown if data is invalid, e.g. order is null or any value inside the order is null</li>   
+	 * <li>An exception is thrown if data is invalid, e.g. order is null or any value inside the order is null</li>
+	 * <li>CustomerReport: String customerId, BigDecimal totalEUR, int ordersCount, Instant lastOrderTimestamp</li>   
 	 * </ul>
 	 * @param orders list of orders as an input
 	 * @param exchangeRates mapping between currencies and their rate to EUR
@@ -45,62 +46,67 @@ public class AdvancedOrderService {
 			int minOrdersCount) {
 		
 		validateInput(orders, exchangeRates, topN, minTotalEUR, minOrdersCount);
-		
-		// group by country
-		// aggregate amounts with currency conversion
-		// map to CustomerReport
-		
-		return orders
-				.stream()
-				.collect(Collectors.groupingBy(          // Map<String, List<Order>>, where List<Orders> is per country
+		return orders.stream()									// Stream<Order>
+				.collect(Collectors.groupingBy(					// Map<String, Stream<Order>>
 						Order::country, 
 						Collectors.collectingAndThen(
-								Collectors.groupingBy(           // Map<String, Map<String, List<Order>>>, where List<Orders> is per single customerId 
-										Order::customerId,
-										Collector.of(			 // Map<String, Map<String, CustomerReport>>>
-												MutableAccumulator::new,
-												(acc, order) -> acc.addOrder(order, exchangeRates),
-												(a, b) -> a.merge(b),
-												(acc) -> acc.toCustomerReport()
-										)
-								),
-								map -> map.values()  // Map<String, List<CustomerReport>>
-									.stream()
-									.filter(cr -> cr.totalEUR().compareTo(minTotalEUR) >= 0)
+							Collectors.groupingBy(					// Map<String, Map<String, Stream<Order>>>
+								Order::customerId,
+								Collector.of(										// Map<String, Map<String, CustomerReport>>
+										() -> new Accumulator(exchangeRates),
+										Accumulator::addOrder,
+										Accumulator::merge,
+										Accumulator::toCustomerReport	
+								)
+							),
+							x -> x.values()
+									.stream()														// Stream<CustomerReport>
 									.filter(cr -> cr.ordersCount() >= minOrdersCount)
-									.sorted(Comparator.comparing(CustomerReport::totalEUR).reversed())
+									.filter(cr -> cr.totalEUR().compareTo(minTotalEUR) >= 0)
+									.sorted(Comparator.comparing(CustomerReport::totalEUR).reversed().thenComparing(CustomerReport::customerId))
 									.limit(topN)
-									.toList()    
-							)
+									.collect(Collectors.toList())									// List<CustomerReport>
+						)
 				));
 	}
 	
-	private class MutableAccumulator {
-		public String customerId = null;
-		public BigDecimal totalEUR = BigDecimal.ZERO;
-		public int numerOfOrders = 0;
-		public Instant latestOrderTimestamp = Instant.MIN;
+	private class Accumulator {
 		
-		public void addOrder(Order order, Map<String, BigDecimal> conversionRates) {
-			this.customerId = order.customerId();
-			this.totalEUR = this.totalEUR.add(order.amount().multiply(conversionRates.get(order.currency())));
-			this.numerOfOrders += 1;
-			if (order.timestamp().isAfter(latestOrderTimestamp)) {
-				this.latestOrderTimestamp = order.timestamp();
-			}
+		private Map<String, BigDecimal> exchangeRates;
+		
+		public String customerId;
+		public BigDecimal totalAmount = BigDecimal.ZERO;
+		public int ordersCount = 0;
+		public Instant lastOperationTimestamp = Instant.MIN;
+		
+		
+		public Accumulator(Map<String, BigDecimal> exchangeRates) {
+			this.exchangeRates = exchangeRates;
 		}
 		
-		public MutableAccumulator merge(MutableAccumulator other) {
-			this.totalEUR = this.totalEUR.add(other.totalEUR);
-			this.numerOfOrders = this.numerOfOrders + other.numerOfOrders;
-			if (other.latestOrderTimestamp.isAfter(this.latestOrderTimestamp)) {
-				this.latestOrderTimestamp = other.latestOrderTimestamp;
-			}
+		public Accumulator addOrder(Order order) {
+			this.customerId = order.customerId();
+			this.totalAmount = this.totalAmount.add(order.amount().multiply(exchangeRates.get(order.currency())));
+			this.ordersCount += 1;
+			insertIfLater(order.timestamp());
+			return this;
+		}
+		
+		public Accumulator merge(Accumulator other) {
+			this.totalAmount = this.totalAmount.add(other.totalAmount);
+			this.ordersCount += other.ordersCount;
+			insertIfLater(other.lastOperationTimestamp);
 			return this;
 		}
 		
 		public CustomerReport toCustomerReport() {
-			return new CustomerReport(customerId, totalEUR, numerOfOrders, latestOrderTimestamp);
+			return new CustomerReport(customerId, totalAmount, ordersCount, lastOperationTimestamp);
+		}
+		
+		private void insertIfLater(Instant other) {
+			if (other.isAfter(this.lastOperationTimestamp)) {
+				this.lastOperationTimestamp = other;
+			}
 		}
 	}
 	

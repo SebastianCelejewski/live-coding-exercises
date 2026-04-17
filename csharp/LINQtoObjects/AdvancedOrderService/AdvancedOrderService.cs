@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LiveCodingExercises.LINQtoObjects.OrderService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,6 +18,7 @@ namespace LiveCodingExercises.LINQtoObjects.AdvancedOrderService
         /// <para>If two consumers have the same total amount, their order is be consistent, i.e.it does not matter which goes first on the list, but but this order is be preserved between method calls</para>
         /// <para>Consumer report contains the time stamp of the last operation for given customer</para>
         /// <para>An exception is thrown if data is invalid, e.g. order is null or any value inside the order is null</para>
+        /// <para>CustomerReport: string customerId, decimal totalEUR, int ordersCount, DateTime lastOrderTimestamp</para>
         /// </summary>
         /// <param name="orders">list of orders as an input</param>
         /// <param name="exchangeRates">mapping between currencies and their rate to EUR</param>
@@ -33,23 +35,54 @@ namespace LiveCodingExercises.LINQtoObjects.AdvancedOrderService
             int minOrdersCount)
         {
             ValidateInput(orders, exchangeRates, topN, minTotalEUR, minOrdersCount);
-            return orders                                               // IEnumerable<Order>
-                .GroupBy(o => o.country)                                // IGrouping<String, Order>, where Orders are for a single country
-                .ToDictionary(
-                    countryOrders => countryOrders.Key,                 // IDictionary<string, ...
-                    countryOrders => countryOrders.GroupBy(o => o.customerId)                     // IDictionary<string, IGrouping<string, Order>>  
-                                                    .Select(customerOrders => new CustomerReport(
-                                                                                customerOrders.Key,
-                                                                                customerOrders.Sum(o => o.amount * exchangeRates[o.currency]),
-                                                                                customerOrders.Count(),
-                                                                                customerOrders.Max(o => o.timestamp)
-                                                                          ))
-                                                    .Where(cr => cr.totalEUR >= minTotalEUR)
-                                                    .Where(cr => cr.ordersCount >= minOrdersCount)
-                                                    .OrderByDescending(cr => cr.totalEUR)
-                                                    .ThenBy(cr => cr.customerId)
-                                                    .Take(topN)
+            return orders                                                   // IEnumerable<Order>
+                    .GroupBy(order => order.country)                        // IGrouping<string, IEnumerable<Order>>, where Order is for a single country, but multiple customers
+                    .ToDictionary(                                          // IDictionary<string, IEnumerable<Order>>, where Order is for a single country, but multiple customers
+                        g => g.Key,
+                        g => g.GroupBy(order => order.customerId)
+                              .Select(x => x.Aggregate(
+                                                new Accumulator(exchangeRates),
+                                                (acc, element) => acc.AddOrder(element),
+                                                (acc) => acc.ToCustomerReport()
+                                                ))
+                              .Where(cr => cr.totalEUR >= minTotalEUR)
+                              .Where(cr => cr.ordersCount >= minOrdersCount)
+                              .OrderByDescending(cr => cr.totalEUR)
+                              .ThenBy(cr => cr.customerId)
+                              .Take(topN)
                     );
+        }
+
+        private class Accumulator
+        {
+            private IDictionary<string, decimal> exchangeRates;
+
+            private string customerId = string.Empty;
+            private decimal totalAmount = 0.00m;
+            private int orderCount = 0;
+            private DateTime lastOperationTimestamp = DateTime.MinValue;
+
+            public Accumulator(IDictionary<string, decimal> exchangeRates)
+            {
+                this.exchangeRates = exchangeRates;
+            }
+
+            public Accumulator AddOrder(Order order)
+            {
+                customerId = order.customerId;
+                totalAmount += order.amount * exchangeRates[order.currency];
+                orderCount++;
+                if (order.timestamp.CompareTo(lastOperationTimestamp) > 0)
+                {
+                    lastOperationTimestamp = order.timestamp;
+                }
+                return this;
+            }
+
+            public CustomerReport ToCustomerReport()
+            {
+                return new CustomerReport(customerId, totalAmount, orderCount, lastOperationTimestamp);
+            }
         }
 
         private void ValidateInput(IEnumerable<Order> orders, IDictionary<string, decimal> exchangeRates, int topN, decimal minTotalEUR, int minOrdersCount)
