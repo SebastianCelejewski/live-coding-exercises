@@ -58,9 +58,10 @@ public class LongestCommonSubsequenceTests {
 	}
 	
 	@Test
+	
 	public void should_handle_single_character_appearing_multiple_times() {
-		assertEquals(2,  cut.calculateLongestCommonSubsequenceLength("aa", "aaaa"));
-		assertEquals(2,  cut.calculateLongestCommonSubsequenceLength("aaaa", "aa"));
+		assertEquals(2, cut.calculateLongestCommonSubsequenceLength("aa", "aaaa"));
+		assertEquals(2, cut.calculateLongestCommonSubsequenceLength("aaaa", "aa"));
 	}
 	
 	@Test
@@ -75,4 +76,43 @@ public class LongestCommonSubsequenceTests {
 		assertEquals(3, cut.calculateLongestCommonSubsequenceLength("...a...c....e...d...b", "abcd"));
 	}
 
+	@Test
+	public void should_handle_competing_repeated_paths() {
+	    assertEquals(3, cut.calculateLongestCommonSubsequenceLength("abab", "baba"));
+	}
+	
+	@Test
+	public void should_not_greedily_consume_repeated_letters() {
+	    assertEquals(5, cut.calculateLongestCommonSubsequenceLength("banana", "ananas"));
+	}
+	
+	@Test
+	public void should_handle_classic_lcs_case() {
+	    assertEquals(4, cut.calculateLongestCommonSubsequenceLength("abcbdab", "bdcaba"));
+	}
+	
+	@Test
+	public void should_handle_interleaving_repeated_patterns() {
+	    assertEquals(7, cut.calculateLongestCommonSubsequenceLength("abababab", "babababa"));
+	}
+	
+	@Test
+	public void should_handle_many_possible_positions_for_same_character() {
+	    assertEquals(4, cut.calculateLongestCommonSubsequenceLength("aabbaacc", "abac"));
+	}
+	
+	@Test
+	public void should_handle_position_conflicts() {
+	    assertEquals(3, cut.calculateLongestCommonSubsequenceLength("ABCDE", "AECBD"));
+	}
+	
+	@Test
+	public void should_handle_late_better_path() {
+	    assertEquals(5, cut.calculateLongestCommonSubsequenceLength("axbyczdwe", "abcde"));
+	}
+	
+	@Test
+	public void should_handle_multiple_competing_a_paths() {
+	    assertEquals(6, cut.calculateLongestCommonSubsequenceLength("aaabaa", "abaabaa"));
+	}
 }
