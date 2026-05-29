@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import pl.sebcel.livecoding.dynamicprogramming.lcs.LongestCommonSubsequence;
+
 public class LongestCommonSubsequenceTests {
 
 	private LongestCommonSubsequence cut = new LongestCommonSubsequence();
@@ -114,5 +116,41 @@ public class LongestCommonSubsequenceTests {
 	@Test
 	public void should_handle_multiple_competing_a_paths() {
 	    assertEquals(6, cut.calculateLongestCommonSubsequenceLength("aaabaa", "abaabaa"));
+	}
+	
+	@Test
+	public void nasty_case_1() {
+		assertEquals(5, cut.calculateLongestCommonSubsequenceLength("aaaaa", "aaaaaaaa"));
+		assertEquals(5, cut.calculateLongestCommonSubsequenceLength("aaaaaaaa", "aaaaa"));
+	}
+	
+	@Test
+	public void nasty_case_2() {
+		assertEquals(5, cut.calculateLongestCommonSubsequenceLength("baaaaa", "aaaaab"));
+	}
+	
+	@Test
+	public void nasty_case_3() {
+		assertEquals(7, cut.calculateLongestCommonSubsequenceLength("abababab", "babababa"));
+	}
+	
+	@Test
+	public void nasty_case_4() {
+		assertEquals(4, cut.calculateLongestCommonSubsequenceLength("ABCBDAB", "BDCABA"));
+	}
+	
+	@Test
+	public void nasty_case_5() {
+		assertEquals(4, cut.calculateLongestCommonSubsequenceLength("XMJYAUZ", "MZJAWXU"));
+	}
+	
+	@Test
+	public void nasty_case_6() {
+		assertEquals(6, cut.calculateLongestCommonSubsequenceLength("xxAxxBxxCxxDxxExxFxx", "AyyByyCyyDyyEyyF"));
+	}
+	
+	@Test
+	public void nasty_case_7() {
+		assertEquals(4, cut.calculateLongestCommonSubsequenceLength("xxxxabcd", "abcdxxxx"));
 	}
 }
