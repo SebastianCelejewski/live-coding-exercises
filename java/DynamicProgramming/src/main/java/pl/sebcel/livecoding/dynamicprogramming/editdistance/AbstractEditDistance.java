@@ -21,5 +21,8 @@ public abstract class AbstractEditDistance implements EditDistance {
 			System.out.println(indents.get(level) + message);
 		}
 	}
-
+	
+	protected int min(int a, int b, int c) {
+		return Math.min(a, Math.min(b, c));
+	}
 }

@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-import pl.sebcel.livecoding.dynamicprogramming.editdistance.BruteForceEditDistanceWithCache;
+import pl.sebcel.livecoding.dynamicprogramming.editdistance.DynamicProgrammingEditDistance;
 import pl.sebcel.livecoding.dynamicprogramming.editdistance.EditDistance;
 
 public class EditDistanceTests {
 
-	private EditDistance cut = new BruteForceEditDistanceWithCache();
-	
+	private EditDistance cut = new DynamicProgrammingEditDistance();
+
 	@Test
 	public void should_throw_NullPointerException_if_any_of_input_strings_are_null() {
 		assertThrows(NullPointerException.class, () -> {

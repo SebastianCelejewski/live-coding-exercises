@@ -40,8 +40,4 @@ public class BruteForceEditDistance extends AbstractEditDistance {
 		
 		return result;
 	}
-
-	private int min(int a, int b, int c) {
-		return Math.min(a, Math.min(b, c));
-	}
 }
