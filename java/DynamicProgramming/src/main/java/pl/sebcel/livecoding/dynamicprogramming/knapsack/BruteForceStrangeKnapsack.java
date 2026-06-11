@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class BruteForceKnapsack extends AbstractKnapsack {
+public class BruteForceStrangeKnapsack extends AbstractStrangeKnapsack {
 
 	private final static boolean USE_CACHE = false;
 

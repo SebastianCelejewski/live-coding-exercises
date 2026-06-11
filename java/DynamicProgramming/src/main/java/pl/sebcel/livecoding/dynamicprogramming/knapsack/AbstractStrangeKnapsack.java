@@ -1,6 +1,6 @@
 package pl.sebcel.livecoding.dynamicprogramming.knapsack;
 
-public abstract class AbstractKnapsack implements Knapsack {
+public abstract class AbstractStrangeKnapsack implements StrangeKnapsack {
 	
 	private final static boolean VERBOSE = false;
 

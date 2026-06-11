@@ -2,7 +2,7 @@ package pl.sebcel.livecoding.dynamicprogramming.knapsack;
 
 import java.util.Objects;
 
-public class DynamicProgrammingKnapsack extends AbstractKnapsack {
+public class DynamicProgrammingStrangeKnapsack extends AbstractStrangeKnapsack {
 
 	public int getMaxItemWeight(int limit, int[] weights) {
 

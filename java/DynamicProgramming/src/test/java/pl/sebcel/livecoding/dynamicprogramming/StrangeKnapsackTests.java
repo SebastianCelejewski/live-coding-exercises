@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-import pl.sebcel.livecoding.dynamicprogramming.knapsack.DynamicProgrammingKnapsack;
-import pl.sebcel.livecoding.dynamicprogramming.knapsack.Knapsack;
+import pl.sebcel.livecoding.dynamicprogramming.knapsack.DynamicProgrammingStrangeKnapsack;
+import pl.sebcel.livecoding.dynamicprogramming.knapsack.StrangeKnapsack;
 
-public class KnapsackTests {
+public class StrangeKnapsackTests {
 
-	private Knapsack cut = new DynamicProgrammingKnapsack();
+	private StrangeKnapsack cut = new DynamicProgrammingStrangeKnapsack();
 
 	@Test
 	public void should_validate_input() {

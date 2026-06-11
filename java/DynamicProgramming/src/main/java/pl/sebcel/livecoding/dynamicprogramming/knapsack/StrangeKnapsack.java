@@ -1,6 +1,6 @@
 package pl.sebcel.livecoding.dynamicprogramming.knapsack;
 
-public interface Knapsack {
+public interface StrangeKnapsack {
 
 	public int getMaxItemWeight(int limit, int[] weights);
 
